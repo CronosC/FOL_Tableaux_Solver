@@ -1,0 +1,10 @@
+{:and, [{:not, {:I, [{:not, :c}, :d]}}, {:and, [{:I, [{:not, :i}, :g]}, {:G, [:a]}, {:I, [{:not, :i}, :g]}, {:J, [:e, :a]}, :e, :a]}]}
+{:not, {:and, [{:I, [{:not, :c}, :d]}, {:not, :i}, {:I, [:h, {:not, :g}]}, {:I, [{:not, :c}, :d]}, :g]}}
+{:and, [{:not, {:not, :c}}, {:or, [{:F, [:f]}, {:not, :e}, {:J, [:d, {:not, :c}]}, :c, :g, {:J, [:e, :a]}]}, {:not, {:G, [:a]}}]}
+{:and, [{:or, [{:not, :d}, {:J, [:f, {:not, :i}]}, :d, :c, {:I, [{:not, :c}, :d]}, {:not, :c}]}, {:not, {:G, [:e]}}, {:and, [{:J, [:f, {:not, :i}]}, {:not, :b}, :d, {:not, :a}, {:J, [:d, {:not, :c}]}]}, {:not, {:not, :a}}]}
+{:or, [{:not, {:J, [:f, {:not, :i}]}}, {:or, [{:I, [{:not, :i}, :g]}, {:not, :a}, :a, {:not, :b}, :b, {:not, :e}]}, {:or, [{:I, [:h, {:not, :g}]}, {:J, [:e, :a]}, {:J, [:f, {:not, :i}]}, :b]}]}
+{:and, [{:and, [:a, {:H, [:i]}, {:H, [:e]}, {:not, :g}]}, {:or, [{:not, :e}, {:not, :e}]}]}
+{:and, [{:or, [:b, {:J, [:e, :a]}]}, {:not, {:F, [:c]}}]}
+{:not, {:and, [{:not, :b}, {:not, :c}]}}
+{:or, [{:or, [{:H, [:e]}, {:I, [{:not, :i}, :g]}]}, {:and, [{:G, [:a]}, {:not, :a}, {:I, [:h, {:not, :g}]}, {:J, [:e, :a]}]}, {:not, {:F, [:i]}}, {:or, [{:not, :i}, {:G, [:h]}, {:F, [:f]}, {:F, [:c]}, :d, :h]}, {:or, [{:J, [:d, {:not, :c}]}, {:not, :a}]}, {:not, {:J, [:f, {:not, :i}]}}]}
+{:not, {:not, :d}}

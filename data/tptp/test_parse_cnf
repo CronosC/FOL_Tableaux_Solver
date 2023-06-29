@@ -1,0 +1,56 @@
+cnf(absolute_sum_less_or_equal_sum_of_absolutes2,axiom,
+    ( ~ less_or_equal(add(absolute(X),absolute(Y)),Z)
+    | less_or_equal(absolute(add(X,Y)),Z) ) ).
+
+% test comment please ignore. ²³4 w45 76e980 w35jmdfin gdfvASD; AYXMC"!$§T 
+
+cnf(minimum3,axiom,
+    ( ~ less_or_equal(Z,minimum(X,Y))
+    | less_or_equal(Z,X) ) ).
+
+cnf(minimum7,axiom,
+    ( ~ less_or_equal(Z,minimum(X,Y))
+    | less_or_equal(Z,Y) ) ).
+
+cnf(minimum9,axiom,
+    ( less_or_equal(X,n0)
+    | less_or_equal(Y,n0)
+    | ~ less_or_equal(minimum(X,Y),n0) ) ).
+
+cnf(less_or_equal_sum_of_halves,axiom,
+    ( ~ less_or_equal(X,half(Z))
+    | ~ less_or_equal(Y,half(Z))
+    | less_or_equal(add(X,Y),Z) ) ).
+
+cnf(zero_and_half,axiom,
+    ( less_or_equal(X,n0)
+    | ~ less_or_equal(half(X),n0) ) ).
+
+cnf(clause_1,hypothesis,
+    ( less_or_equal(Epsilon,n0)
+    | ~ less_or_equal(delta_1(Epsilon),n0) ) ).
+
+cnf(clause_2,hypothesis,
+    ( less_or_equal(Epsilon,n0)
+    | ~ less_or_equal(delta_2(Epsilon),n0) ) ).
+
+cnf(clause_3,hypothesis,
+    ( less_or_equal(Epsilon,n0)
+    | ~ less_or_equal(absolute(add(Z,negate(a_real_number))),delta_1(Epsilon))
+    | less_or_equal(absolute(add(f(Z),negate(f(a_real_number)))),Epsilon) ) ).
+
+cnf(clause_4,hypothesis,
+    ( less_or_equal(Epsilon,n0)
+    | ~ less_or_equal(absolute(add(Z,negate(a_real_number))),delta_2(Epsilon))
+    | less_or_equal(absolute(add(g(Z),negate(g(a_real_number)))),Epsilon) ) ).
+
+cnf(clause_5,hypothesis,
+    ~ less_or_equal(epsilon_0,n0) ).
+
+cnf(clause_6,hypothesis,
+    ( less_or_equal(Delta,n0)
+    | less_or_equal(absolute(add(xs(Delta),negate(a_real_number))),Delta) ) ).
+
+cnf(clause_7_1,negated_conjecture,
+    ( less_or_equal(Delta,n0)
+    | ~ less_or_equal(absolute(add(add(f(xs(Delta)),negate(f(a_real_number))),add(g(xs(Delta)),negate(g(a_real_number))))),epsilon_0) ) ).

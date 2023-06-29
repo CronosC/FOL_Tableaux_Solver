@@ -1,0 +1,10 @@
+{:or, [{:not, :h}, {:I, [:a, :g]}, :g, {:H, [{:not, :d}]}, {:J, [{:not, :f}, {:not, :d}]}]}
+{:and, [{:F, [{:not, :e}]}, :g]}
+{:and, [:f, {:J, [:e, :g]}, {:not, :e}, {:not, :i}]}
+{:not, :c}
+{:not, {:G, [{:not, :d}]}}
+{:not, {:not, :f}}
+{:and, [:f, :a, :f, {:I, [:a, :g]}, {:not, :d}]}
+{:and, [:h, {:J, [{:not, :e}, :c]}, {:not, :d}, {:G, [{:not, :h}]}, {:not, :h}]}
+{:not, {:F, [:d]}}
+{:or, [{:not, :i}, {:H, [:f]}, {:not, :e}, {:H, [{:not, :d}]}]}
