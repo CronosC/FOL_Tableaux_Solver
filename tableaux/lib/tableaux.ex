@@ -30,71 +30,12 @@ defmodule Tableaux do
   '''
   # Start the tableaux proof by contradiction
   def proof(expression, firsth\\&Function.identity/1, orderfunc\\&Enum.sort/1) do
-    if wff?(expression) do
-      expression = preprocess(expression, orderfunc)
+    if Logic.wff?(expression) do
+      expression = PrePro.preprocess(expression, orderfunc)
       Tableaux.sat?([{:not, expression}], firsth)
     else
       IO.puts("Expression is invalid!")
       :error
-    end
-  end
-
-  # all the preprocessing steps we do on the expression
-  @spec preprocess(any, any) :: any
-  def preprocess(expression, orderfunc\\&Enum.sort/1) do
-    preprocess_quantifiers(order(expression, orderfunc))
-  end
-
-  # orders all arguments of nary operators according to orderfunc
-  def order(expression, orderfunc) do
-    case expression do
-      {q, v, x} -> {q, v, order(x, orderfunc)}
-      {f, x} when is_list(x) ->
-        if operator?(f) do
-          {f, Enum.map(x, fn x -> order(x, orderfunc) end)}
-        else
-          {f, x}
-        end
-      {:not, x} -> {:not, order(x, orderfunc)}
-      x -> x
-    end
-  end
-
-  def preprocess_quantifiers(expression) do
-    case expression do
-      {q, v, phi} when is_list(v) ->
-        theta = get_substitution_for_quantified_vars(v)
-        {q, substitute(v, theta), preprocess_quantifiers(substitute(phi, theta))}
-      {f, x} when is_list(x) -> {f, Enum.map(x, fn x -> preprocess_quantifiers(x) end)}
-      {f, phi} -> {f, preprocess_quantifiers(phi)}
-      x -> x
-    end
-  end
-
-  # Creates a substitution (map) of a list of variables s.t. all get qVar_ as prefix
-  # [:X, :Y] ==> %{:X => :qVar_X, :Y => :qVar_Y}
-  def get_substitution_for_quantified_vars(varlist) do
-    case varlist do
-      [v | []] -> %{v => String.to_atom("qVar_" <> Atom.to_string(v))}
-      [v | vs] -> Map.merge(%{v => String.to_atom("qVar_" <> Atom.to_string(v))}, get_substitution_for_quantified_vars(vs))
-    end
-  end
-
-  def substitute(formula, theta) do
-    case formula do
-      {q, v, x} -> {q, v, substitute(x, theta)}
-      {f, x} -> {f, substitute(x, theta)}
-      x when is_list(x) -> Enum.map(x, fn x -> substitute(x, theta) end)
-      x when is_map_key(theta, x) -> theta[x]
-      x -> x
-    end
-
-  end
-
-  def remove_duplicates(expressions) do
-    case expressions do
-      [x | tail] -> if x in tail do remove_duplicates(tail) else [x] ++ remove_duplicates(tail) end
-      [] -> []
     end
   end
 
@@ -131,7 +72,7 @@ defmodule Tableaux do
           [{:and, operands} | tail] ->
             sat?(operands ++ tail, firsth)
           [{:not, {:or, operands}} | tail] ->
-            sat?(negate(operands) ++ tail, firsth)
+            sat?(Logic.negate(operands) ++ tail, firsth)
 
           # beta
           [{:or, operands} | tail] ->
@@ -140,7 +81,7 @@ defmodule Tableaux do
             end
             Enum.any?(tasks)
           [{:not, {:and, operands}} | tail] ->
-            operands = negate(operands)
+            operands = Logic.negate(operands)
             tasks = for op <- operands do
               do_async(fn -> sat?([op] ++ tail, firsth) end)
             end
@@ -148,40 +89,17 @@ defmodule Tableaux do
 
 
           # else literal in front => ignore
-          [x | tail] -> if atomic?(x) do sat?(tail ++ [x], firsth) else IO.puts("This should never occur! Missing case in sat.") end
+          [x | tail] -> if Logic.atomic?(x) do sat?(tail ++ [x], firsth) else IO.puts("This should never occur! Missing case in sat.") end
         end
       end
     end
   end
 
-  def negate(expressions) do
+  # removes duplicate expressions from the expression list
+  def remove_duplicates(expressions) do
     case expressions do
-      x when is_list(x) -> Enum.map(x, &negate/1)
-      x -> {:not, x}
-    end
-  end
-
-  # checks syntactic correctness of an expression
-  def wff?(expression) do
-    case expression do
-      x -> if atomic?(x) do :true else
-        case x do
-          {:allqu, v, x} -> if Enum.all?(Enum.map(v, &atomic?/1)) do wff?(x) else :false end
-          {:exqu, v, x} -> if Enum.all?(Enum.map(v, &atomic?/1)) do wff?(x) else :false end
-          {:not, x} -> wff?(x)
-          {:and, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:or, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:nand, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:nor, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:rimp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:limp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:nrimp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:nlimp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          x -> IO.puts("Forgotten case in wff?!")
-               IO.inspect(x)
-               :false
-        end
-      end
+      [x | tail] -> if x in tail do remove_duplicates(tail) else [x] ++ remove_duplicates(tail) end
+      [] -> []
     end
   end
 
@@ -200,7 +118,7 @@ defmodule Tableaux do
     case expressions do
       [] -> :true
       [x | tail] ->
-        case atomic?(x) do
+        case Logic.atomic?(x) do
           :true -> done?(tail)
           :false -> :false
         end
@@ -211,7 +129,7 @@ defmodule Tableaux do
   def only_beta?(expressions) do
     case expressions do
       [] -> :true
-      [x | tail] -> if atomic?(x) do
+      [x | tail] -> if Logic.atomic?(x) do
         only_beta?(tail)
       else
         (beta?(x) and only_beta?(tail))
@@ -226,21 +144,6 @@ defmodule Tableaux do
       {:not, {:and, _}} -> :true
       _ -> :false
     end
-  end
-
-  # checks if some expression is atomic. Includes predicates.
-  def atomic?(expression) do
-    case expression do
-      {:not, x} -> atomic?(x)
-      {f, x} when is_list(x) -> (not operator?(f)) and Enum.all?(Enum.map(x, &atomic?/1))
-      {f, x} -> (not operator?(f)) and atomic?(x)
-      x when is_atom(x) -> not operator?(x)
-    end
-  end
-
-  # checks if something is in our approved operator list.
-  def operator?(f) do
-      f in [:not, :and, :or, :nand, :nor, :limp, :rimp, :nlimp, :nrimp]
   end
 
   # iterates over list of expressions and pulls alpha expressions to the front
@@ -273,69 +176,3 @@ defmodule Tableaux do
   end
 
 end
-
-defmodule Helper do
-  def timed_proof(expr) do
-    IO.puts("Result: ")
-    IO.inspect(Tableaux.proof(expr))
-    IO.puts("Timings: ")
-    IO.puts("as given: ")
-    IO.inspect(Helper.time(fn -> Tableaux.proof(expr) end))
-    IO.puts("randomized: ")
-    IO.inspect(Helper.time(fn -> Tableaux.proof(expr, &Enum.shuffle/1) end))
-    IO.puts("beta_last: ")
-    IO.inspect(Helper.time(fn -> Tableaux.proof(expr, &Tableaux.beta_last/1) end))
-    IO.puts("done!")
-  end
-
-  def timed_proofs(expressions) do
-    IO.puts("number of expressions")
-    IO.inspect(length(expressions))
-    IO.puts("as given: ")
-    IO.inspect(Helper.time(fn -> Enum.map(expressions, fn {x, _} -> Tableaux.proof(x) end) end))
-    IO.puts("randomized: ")
-    IO.inspect(Helper.time(fn -> Enum.map(expressions, fn {x, _} -> Tableaux.proof(x, &Enum.shuffle/1) end) end))
-    IO.puts("beta_last: ")
-    IO.inspect(Helper.time(fn -> Enum.map(expressions, fn {x, _} -> Tableaux.proof(x, &Tableaux.beta_last/1) end) end))
-    #IO.puts("alpha_first: ")
-    #IO.inspect(Helper.time(fn -> Enum.map(expressions, fn {x, _} -> Tableaux.proof(x, &Tableaux.alpha_first/1) end) end))
-  end
-
-  def time(function) do
-    function
-    |> :timer.tc
-    |> elem(0)
-    |> Kernel./(1_000_000)
-  end
-end
-'''
-[mode, file_arg | _] = System.argv()
-case mode do
-  "tptp" -> :pass
-    #:leex.file('TPTP.xrl')
-    #c("TPTP.erl")
-
-    expression_file = "tptp/" <> file_arg
-    {status, file_str} = File.read(expression_file)
-
-    IO.inspect(file_str)
-
-    {:ok, tokens, _} = :TPTP.string(file_str)
-    IO.inspect(tokens)
-
-  "txt" ->
-    expression_file = "expressions/" <> file_arg <> ".txt"
-    {status, file_str} = File.read(expression_file)
-
-
-    case status do
-      :error -> IO.puts("Could not read file!")
-      _ ->
-        expressions = String.split(file_str, "\n")
-        expressions = Enum.map(expressions, fn x -> String.replace(x, "\r", "") end)
-        expressions = Enum.map(expressions, fn x -> Code.eval_string(x) end)
-        Helper.timed_proofs(expressions)
-        #Enum.map(expressions, fn {x, _} -> Helper.timed_proof(x) end)
-      end
-end
-'''
