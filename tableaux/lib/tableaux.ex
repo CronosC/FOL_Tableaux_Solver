@@ -4,19 +4,28 @@ defmodule Tableaux do
   Assumptions:
     nary operators
     valid operators are:
-      :not 1
-      :and n
-      :or n
+      :not/1
+      :and/n
+      :or/n
     all operators are defined as:
         {:operator, [list of operands]}
         except not, which is:
         {:not, operand}
     Predicates are possible. They are defined in the same way:
         P(a, b) == {:P, [:a, :b]}
+    Quantifiers are possible:
+        \forall x, y phi == {:allqu, [x, y], phi}
+        \existence x phi == {:exqu, [x], phi}
+  '''
+
+  '''
+    Unificiation
+    Skolemization
   '''
 
   '''
   Notes:
+    - restructure s.t. functions are seperated into more modules. E.g. Terms module for stuff like negate or operator?.
     - applying heuristic in each step is inefficient: change patterns s.t. beta always goes at the end, rest at the front?
   '''
   # Start the tableaux proof by contradiction
@@ -31,21 +40,55 @@ defmodule Tableaux do
   end
 
   # all the preprocessing steps we do on the expression
-  def preprocess(expression, orderfunc) do
-    order(expression, orderfunc)
+  @spec preprocess(any, any) :: any
+  def preprocess(expression, orderfunc\\&Enum.sort/1) do
+    preprocess_quantifiers(order(expression, orderfunc))
   end
 
   # orders all arguments of nary operators according to orderfunc
   def order(expression, orderfunc) do
     case expression do
+      {q, v, x} -> {q, v, order(x, orderfunc)}
       {f, x} when is_list(x) ->
         if operator?(f) do
           {f, Enum.map(x, fn x -> order(x, orderfunc) end)}
         else
           {f, x}
         end
+      {:not, x} -> {:not, order(x, orderfunc)}
       x -> x
     end
+  end
+
+  def preprocess_quantifiers(expression) do
+    case expression do
+      {q, v, phi} when is_list(v) ->
+        theta = get_substitution_for_quantified_vars(v)
+        {q, substitute(v, theta), preprocess_quantifiers(substitute(phi, theta))}
+      {f, x} when is_list(x) -> {f, Enum.map(x, fn x -> preprocess_quantifiers(x) end)}
+      {f, phi} -> {f, preprocess_quantifiers(phi)}
+      x -> x
+    end
+  end
+
+  # Creates a substitution (map) of a list of variables s.t. all get qVar_ as prefix
+  # [:X, :Y] ==> %{:X => :qVar_X, :Y => :qVar_Y}
+  def get_substitution_for_quantified_vars(varlist) do
+    case varlist do
+      [v | []] -> %{v => String.to_atom("qVar_" <> Atom.to_string(v))}
+      [v | vs] -> Map.merge(%{v => String.to_atom("qVar_" <> Atom.to_string(v))}, get_substitution_for_quantified_vars(vs))
+    end
+  end
+
+  def substitute(formula, theta) do
+    case formula do
+      {q, v, x} -> {q, v, substitute(x, theta)}
+      {f, x} -> {f, substitute(x, theta)}
+      x when is_list(x) -> Enum.map(x, fn x -> substitute(x, theta) end)
+      x when is_map_key(theta, x) -> theta[x]
+      x -> x
+    end
+
   end
 
   def remove_duplicates(expressions) do
@@ -123,6 +166,8 @@ defmodule Tableaux do
     case expression do
       x -> if atomic?(x) do :true else
         case x do
+          {:allqu, v, x} -> if Enum.all?(Enum.map(v, &atomic?/1)) do wff?(x) else :false end
+          {:exqu, v, x} -> if Enum.all?(Enum.map(v, &atomic?/1)) do wff?(x) else :false end
           {:not, x} -> wff?(x)
           {:and, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
           {:or, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
@@ -150,6 +195,7 @@ defmodule Tableaux do
   end
 
   # checks if list of expressions only contains literals
+  @spec done?(maybe_improper_list) :: boolean
   def done?(expressions) do
     case expressions do
       [] -> :true
