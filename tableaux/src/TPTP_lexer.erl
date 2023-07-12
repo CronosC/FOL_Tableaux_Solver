@@ -1,4 +1,4 @@
--file("c:/Program Files/Erlang OTP/lib/parsetools-2.4.1/include/leexinc.hrl", 0).
+-file("/usr/lib/erlang/lib/parsetools-2.3.2/include/leexinc.hrl", 0).
 %% The source of this file is part of leex distribution, as such it
 %% has the same Copyright as the other files in the leex
 %% distribution. The Copyright is defined in the accompanying file
@@ -12,12 +12,12 @@
 -export([format_error/1]).
 
 %% User code. This is placed here to allow extra attributes.
--file("src/TPTP_lexer.xrl", 32).
+-file("src/TPTP_lexer.xrl", 33).
 
 to_atom(Chars) ->
     list_to_atom(Chars).
 
--file("c:/Program Files/Erlang OTP/lib/parsetools-2.4.1/include/leexinc.hrl", 14).
+-file("/usr/lib/erlang/lib/parsetools-2.3.2/include/leexinc.hrl", 14).
 
 format_error({illegal,S}) -> ["illegal characters ",io_lib:write_string(S)];
 format_error({user,S}) -> S.
@@ -38,7 +38,7 @@ string(Ics0, L0, Tcs, Ts) ->
     case yystate(yystate(), Ics0, L0, 0, reject, 0) of
         {A,Alen,Ics1,L1} ->                  % Accepting end state
             string_cont(Ics1, L1, yyaction(A, Alen, Tcs, L0), Ts);
-        {A,Alen,Ics1,L1,_S1} ->              % Accepting transition state
+        {A,Alen,Ics1,L1,_S1} ->              % Accepting transistion state
             string_cont(Ics1, L1, yyaction(A, Alen, Tcs, L0), Ts);
         {reject,_Alen,Tlen,_Ics1,L1,_S1} ->  % After a non-accepting state
             {error,{L0,?MODULE,{illegal,yypre(Tcs, Tlen+1)}},L1};
@@ -579,103 +579,103 @@ yyaction(19, _, _, _) ->
 yyaction(_, _, _, _) -> error.
 
 -compile({inline,yyaction_0/1}).
--file("src/TPTP_lexer.xrl", 8).
+-file("src/TPTP_lexer.xrl", 9).
 yyaction_0(TokenChars) ->
      { token, { start_fof, TokenChars } } .
 
 -compile({inline,yyaction_1/1}).
--file("src/TPTP_lexer.xrl", 9).
+-file("src/TPTP_lexer.xrl", 10).
 yyaction_1(TokenChars) ->
      { token, { start_cnf, TokenChars } } .
 
 -compile({inline,yyaction_2/1}).
--file("src/TPTP_lexer.xrl", 10).
+-file("src/TPTP_lexer.xrl", 11).
 yyaction_2(TokenChars) ->
      { token, { sym, to_atom (TokenChars) } } .
 
 -compile({inline,yyaction_3/1}).
--file("src/TPTP_lexer.xrl", 11).
+-file("src/TPTP_lexer.xrl", 12).
 yyaction_3(TokenChars) ->
      { token, { '(', TokenChars } } .
 
 -compile({inline,yyaction_4/1}).
--file("src/TPTP_lexer.xrl", 12).
+-file("src/TPTP_lexer.xrl", 13).
 yyaction_4(TokenChars) ->
      { token, { ')', TokenChars } } .
 
 -compile({inline,yyaction_5/1}).
--file("src/TPTP_lexer.xrl", 13).
+-file("src/TPTP_lexer.xrl", 14).
 yyaction_5(TokenChars) ->
      { token, { '[', TokenChars } } .
 
 -compile({inline,yyaction_6/1}).
--file("src/TPTP_lexer.xrl", 14).
+-file("src/TPTP_lexer.xrl", 15).
 yyaction_6(TokenChars) ->
      { token, { ']', TokenChars } } .
 
 -compile({inline,yyaction_7/1}).
--file("src/TPTP_lexer.xrl", 15).
+-file("src/TPTP_lexer.xrl", 16).
 yyaction_7(TokenChars) ->
      { token, { ',', TokenChars } } .
 
 -compile({inline,yyaction_8/1}).
--file("src/TPTP_lexer.xrl", 16).
+-file("src/TPTP_lexer.xrl", 17).
 yyaction_8(TokenChars) ->
      { token, { '.', TokenChars } } .
 
 -compile({inline,yyaction_9/1}).
--file("src/TPTP_lexer.xrl", 17).
+-file("src/TPTP_lexer.xrl", 18).
 yyaction_9(TokenChars) ->
      { token, { ':', TokenChars } } .
 
 -compile({inline,yyaction_10/1}).
--file("src/TPTP_lexer.xrl", 18).
+-file("src/TPTP_lexer.xrl", 19).
 yyaction_10(TokenChars) ->
      { token, { 'not', TokenChars } } .
 
 -compile({inline,yyaction_11/1}).
--file("src/TPTP_lexer.xrl", 19).
+-file("src/TPTP_lexer.xrl", 20).
 yyaction_11(TokenChars) ->
      { token, { eq, TokenChars } } .
 
 -compile({inline,yyaction_12/1}).
--file("src/TPTP_lexer.xrl", 20).
+-file("src/TPTP_lexer.xrl", 21).
 yyaction_12(TokenChars) ->
      { token, { neq, TokenChars } } .
 
 -compile({inline,yyaction_13/1}).
--file("src/TPTP_lexer.xrl", 21).
+-file("src/TPTP_lexer.xrl", 22).
 yyaction_13(TokenChars) ->
      { token, { imp, TokenChars } } .
 
 -compile({inline,yyaction_14/1}).
--file("src/TPTP_lexer.xrl", 22).
+-file("src/TPTP_lexer.xrl", 23).
 yyaction_14(TokenChars) ->
      { token, { 'or', TokenChars } } .
 
 -compile({inline,yyaction_15/1}).
--file("src/TPTP_lexer.xrl", 23).
+-file("src/TPTP_lexer.xrl", 24).
 yyaction_15(TokenChars) ->
      { token, { 'and', TokenChars } } .
 
 -compile({inline,yyaction_16/1}).
--file("src/TPTP_lexer.xrl", 24).
+-file("src/TPTP_lexer.xrl", 25).
 yyaction_16(TokenChars) ->
      { token, { exqu, TokenChars } } .
 
 -compile({inline,yyaction_17/1}).
--file("src/TPTP_lexer.xrl", 25).
+-file("src/TPTP_lexer.xrl", 26).
 yyaction_17(TokenChars) ->
      { token, { allqu, TokenChars } } .
 
 -compile({inline,yyaction_18/0}).
--file("src/TPTP_lexer.xrl", 26).
+-file("src/TPTP_lexer.xrl", 27).
 yyaction_18() ->
      skip_token .
 
 -compile({inline,yyaction_19/0}).
--file("src/TPTP_lexer.xrl", 27).
+-file("src/TPTP_lexer.xrl", 28).
 yyaction_19() ->
      skip_token .
 
--file("c:/Program Files/Erlang OTP/lib/parsetools-2.4.1/include/leexinc.hrl", 313).
+-file("/usr/lib/erlang/lib/parsetools-2.3.2/include/leexinc.hrl", 313).

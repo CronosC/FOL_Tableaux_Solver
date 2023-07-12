@@ -6,8 +6,12 @@ defmodule Parser do
     :TPTP_lexer.string(to_charlist(str))
   end
 
-  def parse(tokens) do
+  def parse_tokens(tokens) do
     :TPTP_parser.parse(tokens)
+  end
+
+  def parse(str) do
+    :TPTP_parser.parse(:TPTP_lexer.string(to_charlist(str)))
   end
 
   def parse_TPTP_from_str(str) do
@@ -17,7 +21,7 @@ defmodule Parser do
         {errorcode_parse, expression} = :TPTP_parser.parse(tokens)
         case errorcode_parse do
           :ok ->
-            IO.puts("Parsing successful!")
+            #IO.puts("Parsing successful!")
             expression
           _ ->
             IO.puts("Error parsing tokens!")

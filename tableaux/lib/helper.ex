@@ -2,14 +2,18 @@ defmodule Helper do
 
   def test_all(type) do
     dir = "../data/tptp/" <> type <> "/"
-    IO.puts(dir)
     {:ok, dir_contents} = File.ls(dir)
     files = Enum.map(dir_contents, fn x -> File.read(dir <> x)end)
-    expressions = Enum.map(files, fn {:ok, x} -> Parser.parse_TPTP_from_str(x) end)
-    Enum.map(expressions, fn x ->
-        IO.inspect(x)
-        timed_proof(x)
-      end)
+    IO.puts("Read files..")
+    expressions = Enum.map(files, fn {:ok, x} ->Parser.parse_TPTP_from_str(x)end)
+    IO.puts("Parsed files..")
+    results = Enum.map(expressions, fn x -> Tableaux.proof(x) end)
+    IO.inspect(Enum.zip(dir_contents, results))
+  end
+
+  def proof(file) do
+    expr = Parser.parse_TPTP_from_file(file)
+    Tableaux.proof(expr)
   end
 
   def timed_proof(expr) do

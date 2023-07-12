@@ -11,6 +11,7 @@ defmodule Tableaux do
         {:operator, [list of operands]}
         except not, which is:
         {:not, operand}
+    Variables are uppercase, constants lowercase.
     Predicates are possible. They are defined in the same way:
         P(a, b) == {:P, [:a, :b]}
     Quantifiers are possible:
@@ -20,19 +21,17 @@ defmodule Tableaux do
 
   '''
     Unificiation
-    Skolemization
   '''
 
   '''
   Notes:
-    - restructure s.t. functions are seperated into more modules. E.g. Terms module for stuff like negate or operator?.
     - applying heuristic in each step is inefficient: change patterns s.t. beta always goes at the end, rest at the front?
   '''
   # Start the tableaux proof by contradiction
   def proof(expression, firsth\\&Function.identity/1, orderfunc\\&Enum.sort/1) do
     if Logic.wff?(expression) do
       expression = PrePro.preprocess(expression, orderfunc)
-      Tableaux.sat?([{:not, expression}], firsth)
+      not Tableaux.sat?([{:not, expression}], firsth)
     else
       IO.puts("Expression is invalid!")
       :error
@@ -42,6 +41,7 @@ defmodule Tableaux do
   # Core tableaux method
   def sat?(expressions, firsth) do
     #IO.puts("#{inspect(self())}: #{inspect(expressions)}")
+    #IO.inspect(expressions)
     # check abort condition (phi and not phi)
     if contradiction?(expressions) do
       #IO.puts("#{inspect(self())}: Contradiction found!")
@@ -49,7 +49,8 @@ defmodule Tableaux do
     else
       # check if we can still apply more steps
       if done?(expressions) do
-        #IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
+        IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
+        IO.inspect(expressions)
         :true
       else
         expressions = remove_duplicates(expressions)
@@ -76,16 +77,23 @@ defmodule Tableaux do
 
           # beta
           [{:or, operands} | tail] ->
+            '''
             tasks = for op <- operands do
               do_async(fn -> sat?([op] ++ tail, firsth) end)
             end
             Enum.any?(tasks)
+            '''
+            Enum.any?(Enum.map(operands, fn x -> sat?([x] ++ tail, firsth) end))
+
           [{:not, {:and, operands}} | tail] ->
             operands = Logic.negate(operands)
+            '''
             tasks = for op <- operands do
               do_async(fn -> sat?([op] ++ tail, firsth) end)
             end
             Enum.any?(tasks)
+            '''
+            Enum.any?(Enum.map(operands, fn x -> sat?([x] ++ tail, firsth) end))
 
 
           # else literal in front => ignore
@@ -113,7 +121,6 @@ defmodule Tableaux do
   end
 
   # checks if list of expressions only contains literals
-  @spec done?(maybe_improper_list) :: boolean
   def done?(expressions) do
     case expressions do
       [] -> :true

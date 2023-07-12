@@ -1,10 +1,10 @@
 -module('TPTP_parser').
 -export([parse/1, parse_and_scan/1, format_error/1]).
--file("src/TPTP_parser.yrl", 71).
-
+-file("src/TPTP_parser.yrl", 74).
 extract_token({_Token, Value}) -> Value.
 extract_atom({Token, _Value}) -> Token.
--file("c:/Program Files/Erlang OTP/lib/parsetools-2.4.1/include/yeccpre.hrl", 0).
+%% negate(X) -> {'not', X}.
+-file("/usr/lib/erlang/lib/parsetools-2.3.2/include/yeccpre.hrl", 0).
 %%
 %% %CopyrightBegin%
 %%
@@ -334,9 +334,9 @@ yeccpars2(Other, _, _, _, _, _, _) ->
 
 -dialyzer({nowarn_function, yeccpars2_0/7}).
 -compile({nowarn_unused_function,  yeccpars2_0/7}).
-yeccpars2_0(S, 'start_cnf', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_0(S, start_cnf, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 6, Ss, Stack, T, Ts, Tzr);
-yeccpars2_0(S, 'start_fof', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_0(S, start_fof, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 7, Ss, Stack, T, Ts, Tzr);
 yeccpars2_0(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -345,11 +345,11 @@ yeccpars2_0(_, _, _, _, T, _, _) ->
 -compile({nowarn_unused_function,  yeccpars2_1/7}).
 yeccpars2_1(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
  NewStack = yeccpars2_1_(Stack),
- yeccgoto_S(hd(Ss), Cat, Ss, NewStack, T, Ts, Tzr).
+ 'yeccgoto_\'S\''(hd(Ss), Cat, Ss, NewStack, T, Ts, Tzr).
 
 -dialyzer({nowarn_function, yeccpars2_2/7}).
 -compile({nowarn_unused_function,  yeccpars2_2/7}).
-yeccpars2_2(S, 'start_fof', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_2(S, start_fof, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 7, Ss, Stack, T, Ts, Tzr);
 yeccpars2_2(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
  NewStack = yeccpars2_2_(Stack),
@@ -359,11 +359,11 @@ yeccpars2_2(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_3/7}).
 yeccpars2_3(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
  NewStack = yeccpars2_3_(Stack),
- yeccgoto_S(hd(Ss), Cat, Ss, NewStack, T, Ts, Tzr).
+ 'yeccgoto_\'S\''(hd(Ss), Cat, Ss, NewStack, T, Ts, Tzr).
 
 -dialyzer({nowarn_function, yeccpars2_4/7}).
 -compile({nowarn_unused_function,  yeccpars2_4/7}).
-yeccpars2_4(S, 'start_cnf', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_4(S, start_cnf, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 6, Ss, Stack, T, Ts, Tzr);
 yeccpars2_4(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
  NewStack = yeccpars2_4_(Stack),
@@ -392,7 +392,7 @@ yeccpars2_7(_, _, _, _, T, _, _) ->
 
 -dialyzer({nowarn_function, yeccpars2_8/7}).
 -compile({nowarn_unused_function,  yeccpars2_8/7}).
-yeccpars2_8(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_8(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 9, Ss, Stack, T, Ts, Tzr);
 yeccpars2_8(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -406,7 +406,7 @@ yeccpars2_9(_, _, _, _, T, _, _) ->
 
 -dialyzer({nowarn_function, yeccpars2_10/7}).
 -compile({nowarn_unused_function,  yeccpars2_10/7}).
-yeccpars2_10(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_10(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 11, Ss, Stack, T, Ts, Tzr);
 yeccpars2_10(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -422,13 +422,13 @@ yeccpars2_11(_, _, _, _, T, _, _) ->
 -compile({nowarn_unused_function,  yeccpars2_12/7}).
 yeccpars2_12(S, '(', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 17, Ss, Stack, T, Ts, Tzr);
-yeccpars2_12(S, 'allqu', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_12(S, allqu, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 18, Ss, Stack, T, Ts, Tzr);
-yeccpars2_12(S, 'exqu', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_12(S, exqu, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 19, Ss, Stack, T, Ts, Tzr);
 yeccpars2_12(S, 'not', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 20, Ss, Stack, T, Ts, Tzr);
-yeccpars2_12(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_12(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 21, Ss, Stack, T, Ts, Tzr);
 yeccpars2_12(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -457,11 +457,11 @@ yeccpars2_16(S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_16/7}).
 yeccpars2_cont_16(S, 'and', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 34, Ss, Stack, T, Ts, Tzr);
-yeccpars2_cont_16(S, 'eq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_cont_16(S, eq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 35, Ss, Stack, T, Ts, Tzr);
-yeccpars2_cont_16(S, 'imp', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_cont_16(S, imp, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 36, Ss, Stack, T, Ts, Tzr);
-yeccpars2_cont_16(S, 'neq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_cont_16(S, neq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 37, Ss, Stack, T, Ts, Tzr);
 yeccpars2_cont_16(S, 'or', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 38, Ss, Stack, T, Ts, Tzr);
@@ -498,7 +498,7 @@ yeccpars2_21(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 
 -dialyzer({nowarn_function, yeccpars2_22/7}).
 -compile({nowarn_unused_function,  yeccpars2_22/7}).
-yeccpars2_22(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_22(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 25, Ss, Stack, T, Ts, Tzr);
 yeccpars2_22(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -601,11 +601,11 @@ yeccpars2_38(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_39/7}).
 yeccpars2_39(S, 'and', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 34, Ss, Stack, T, Ts, Tzr);
-yeccpars2_39(S, 'eq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_39(S, eq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 35, Ss, Stack, T, Ts, Tzr);
-yeccpars2_39(S, 'imp', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_39(S, imp, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 36, Ss, Stack, T, Ts, Tzr);
-yeccpars2_39(S, 'neq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_39(S, neq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 37, Ss, Stack, T, Ts, Tzr);
 yeccpars2_39(S, 'or', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 38, Ss, Stack, T, Ts, Tzr);
@@ -632,11 +632,11 @@ yeccpars2_41(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_42/7}).
 yeccpars2_42(S, 'and', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 34, Ss, Stack, T, Ts, Tzr);
-yeccpars2_42(S, 'eq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_42(S, eq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 35, Ss, Stack, T, Ts, Tzr);
-yeccpars2_42(S, 'imp', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_42(S, imp, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 36, Ss, Stack, T, Ts, Tzr);
-yeccpars2_42(S, 'neq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_42(S, neq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 37, Ss, Stack, T, Ts, Tzr);
 yeccpars2_42(S, 'or', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 38, Ss, Stack, T, Ts, Tzr);
@@ -654,7 +654,7 @@ yeccpars2_43(_, _, _, _, T, _, _) ->
 
 -dialyzer({nowarn_function, yeccpars2_44/7}).
 -compile({nowarn_unused_function,  yeccpars2_44/7}).
-yeccpars2_44(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_44(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 46, Ss, Stack, T, Ts, Tzr);
 yeccpars2_44(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -696,11 +696,11 @@ yeccpars2_49(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_51/7}).
 yeccpars2_51(S, 'and', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 34, Ss, Stack, T, Ts, Tzr);
-yeccpars2_51(S, 'eq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_51(S, eq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 35, Ss, Stack, T, Ts, Tzr);
-yeccpars2_51(S, 'imp', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_51(S, imp, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 36, Ss, Stack, T, Ts, Tzr);
-yeccpars2_51(S, 'neq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_51(S, neq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 37, Ss, Stack, T, Ts, Tzr);
 yeccpars2_51(S, 'or', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 38, Ss, Stack, T, Ts, Tzr);
@@ -711,7 +711,7 @@ yeccpars2_51(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 
 -dialyzer({nowarn_function, yeccpars2_52/7}).
 -compile({nowarn_unused_function,  yeccpars2_52/7}).
-yeccpars2_52(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_52(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 53, Ss, Stack, T, Ts, Tzr);
 yeccpars2_52(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -725,7 +725,7 @@ yeccpars2_53(_, _, _, _, T, _, _) ->
 
 -dialyzer({nowarn_function, yeccpars2_54/7}).
 -compile({nowarn_unused_function,  yeccpars2_54/7}).
-yeccpars2_54(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_54(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 55, Ss, Stack, T, Ts, Tzr);
 yeccpars2_54(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -743,7 +743,7 @@ yeccpars2_56(S, '(', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 60, Ss, Stack, T, Ts, Tzr);
 yeccpars2_56(S, 'not', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 20, Ss, Stack, T, Ts, Tzr);
-yeccpars2_56(S, 'sym', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_56(S, sym, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 61, Ss, Stack, T, Ts, Tzr);
 yeccpars2_56(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -789,11 +789,11 @@ yeccpars2_64(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_65/7}).
 yeccpars2_65(S, 'and', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 34, Ss, Stack, T, Ts, Tzr);
-yeccpars2_65(S, 'eq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_65(S, eq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 35, Ss, Stack, T, Ts, Tzr);
-yeccpars2_65(S, 'imp', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_65(S, imp, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 36, Ss, Stack, T, Ts, Tzr);
-yeccpars2_65(S, 'neq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_65(S, neq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 37, Ss, Stack, T, Ts, Tzr);
 yeccpars2_65(S, 'or', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 38, Ss, Stack, T, Ts, Tzr);
@@ -820,11 +820,11 @@ yeccpars2_67(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
 -compile({nowarn_unused_function,  yeccpars2_68/7}).
 yeccpars2_68(S, 'and', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 34, Ss, Stack, T, Ts, Tzr);
-yeccpars2_68(S, 'eq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_68(S, eq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 35, Ss, Stack, T, Ts, Tzr);
-yeccpars2_68(S, 'imp', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_68(S, imp, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 36, Ss, Stack, T, Ts, Tzr);
-yeccpars2_68(S, 'neq', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_68(S, neq, Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 37, Ss, Stack, T, Ts, Tzr);
 yeccpars2_68(S, 'or', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 38, Ss, Stack, T, Ts, Tzr);
@@ -847,9 +847,9 @@ yeccpars2_70(_S, Cat, Ss, Stack, T, Ts, Tzr) ->
  NewStack = yeccpars2_70_(Stack),
  yeccgoto_fof_wrapperlist(hd(Nss), Cat, Nss, NewStack, T, Ts, Tzr).
 
--dialyzer({nowarn_function, yeccgoto_S/7}).
--compile({nowarn_unused_function,  yeccgoto_S/7}).
-yeccgoto_S(0, Cat, Ss, Stack, T, Ts, Tzr) ->
+-dialyzer({nowarn_function, 'yeccgoto_\'S\''/7}).
+-compile({nowarn_unused_function,  'yeccgoto_\'S\''/7}).
+'yeccgoto_\'S\''(0, Cat, Ss, Stack, T, Ts, Tzr) ->
  yeccpars2_5(5, Cat, Ss, Stack, T, Ts, Tzr).
 
 -dialyzer({nowarn_function, yeccgoto_arglist/7}).
@@ -1022,7 +1022,7 @@ yeccpars2_1_(__Stack0) ->
 -compile({inline,yeccpars2_2_/1}).
 -dialyzer({nowarn_function, yeccpars2_2_/1}).
 -compile({nowarn_unused_function,  yeccpars2_2_/1}).
--file("src/TPTP_parser.yrl", 26).
+-file("src/TPTP_parser.yrl", 27).
 yeccpars2_2_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1052,7 +1052,7 @@ yeccpars2_4_(__Stack0) ->
 -compile({inline,yeccpars2_14_/1}).
 -dialyzer({nowarn_function, yeccpars2_14_/1}).
 -compile({nowarn_unused_function,  yeccpars2_14_/1}).
--file("src/TPTP_parser.yrl", 34).
+-file("src/TPTP_parser.yrl", 36).
 yeccpars2_14_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1062,7 +1062,7 @@ yeccpars2_14_(__Stack0) ->
 -compile({inline,yeccpars2_18_/1}).
 -dialyzer({nowarn_function, yeccpars2_18_/1}).
 -compile({nowarn_unused_function,  yeccpars2_18_/1}).
--file("src/TPTP_parser.yrl", 38).
+-file("src/TPTP_parser.yrl", 40).
 yeccpars2_18_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1072,7 +1072,7 @@ yeccpars2_18_(__Stack0) ->
 -compile({inline,yeccpars2_19_/1}).
 -dialyzer({nowarn_function, yeccpars2_19_/1}).
 -compile({nowarn_unused_function,  yeccpars2_19_/1}).
--file("src/TPTP_parser.yrl", 39).
+-file("src/TPTP_parser.yrl", 41).
 yeccpars2_19_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1082,7 +1082,7 @@ yeccpars2_19_(__Stack0) ->
 -compile({inline,yeccpars2_20_/1}).
 -dialyzer({nowarn_function, yeccpars2_20_/1}).
 -compile({nowarn_unused_function,  yeccpars2_20_/1}).
--file("src/TPTP_parser.yrl", 53).
+-file("src/TPTP_parser.yrl", 55).
 yeccpars2_20_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1092,7 +1092,7 @@ yeccpars2_20_(__Stack0) ->
 -compile({inline,yeccpars2_21_/1}).
 -dialyzer({nowarn_function, yeccpars2_21_/1}).
 -compile({nowarn_unused_function,  yeccpars2_21_/1}).
--file("src/TPTP_parser.yrl", 35).
+-file("src/TPTP_parser.yrl", 37).
 yeccpars2_21_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1102,7 +1102,7 @@ yeccpars2_21_(__Stack0) ->
 -compile({inline,yeccpars2_23_/1}).
 -dialyzer({nowarn_function, yeccpars2_23_/1}).
 -compile({nowarn_unused_function,  yeccpars2_23_/1}).
--file("src/TPTP_parser.yrl", 61).
+-file("src/TPTP_parser.yrl", 63).
 yeccpars2_23_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1112,7 +1112,7 @@ yeccpars2_23_(__Stack0) ->
 -compile({inline,yeccpars2_25_/1}).
 -dialyzer({nowarn_function, yeccpars2_25_/1}).
 -compile({nowarn_unused_function,  yeccpars2_25_/1}).
--file("src/TPTP_parser.yrl", 60).
+-file("src/TPTP_parser.yrl", 62).
 yeccpars2_25_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1122,7 +1122,7 @@ yeccpars2_25_(__Stack0) ->
 -compile({inline,yeccpars2_27_/1}).
 -dialyzer({nowarn_function, yeccpars2_27_/1}).
 -compile({nowarn_unused_function,  yeccpars2_27_/1}).
--file("src/TPTP_parser.yrl", 62).
+-file("src/TPTP_parser.yrl", 64).
 yeccpars2_27_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1132,7 +1132,7 @@ yeccpars2_27_(__Stack0) ->
 -compile({inline,yeccpars2_28_/1}).
 -dialyzer({nowarn_function, yeccpars2_28_/1}).
 -compile({nowarn_unused_function,  yeccpars2_28_/1}).
--file("src/TPTP_parser.yrl", 46).
+-file("src/TPTP_parser.yrl", 48).
 yeccpars2_28_(__Stack0) ->
  [___4,___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1142,7 +1142,7 @@ yeccpars2_28_(__Stack0) ->
 -compile({inline,yeccpars2_30_/1}).
 -dialyzer({nowarn_function, yeccpars2_30_/1}).
 -compile({nowarn_unused_function,  yeccpars2_30_/1}).
--file("src/TPTP_parser.yrl", 63).
+-file("src/TPTP_parser.yrl", 65).
 yeccpars2_30_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1152,7 +1152,7 @@ yeccpars2_30_(__Stack0) ->
 -compile({inline,yeccpars2_33_/1}).
 -dialyzer({nowarn_function, yeccpars2_33_/1}).
 -compile({nowarn_unused_function,  yeccpars2_33_/1}).
--file("src/TPTP_parser.yrl", 31).
+-file("src/TPTP_parser.yrl", 33).
 yeccpars2_33_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1162,7 +1162,7 @@ yeccpars2_33_(__Stack0) ->
 -compile({inline,yeccpars2_34_/1}).
 -dialyzer({nowarn_function, yeccpars2_34_/1}).
 -compile({nowarn_unused_function,  yeccpars2_34_/1}).
--file("src/TPTP_parser.yrl", 51).
+-file("src/TPTP_parser.yrl", 53).
 yeccpars2_34_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1172,7 +1172,7 @@ yeccpars2_34_(__Stack0) ->
 -compile({inline,yeccpars2_35_/1}).
 -dialyzer({nowarn_function, yeccpars2_35_/1}).
 -compile({nowarn_unused_function,  yeccpars2_35_/1}).
--file("src/TPTP_parser.yrl", 48).
+-file("src/TPTP_parser.yrl", 50).
 yeccpars2_35_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1182,7 +1182,7 @@ yeccpars2_35_(__Stack0) ->
 -compile({inline,yeccpars2_36_/1}).
 -dialyzer({nowarn_function, yeccpars2_36_/1}).
 -compile({nowarn_unused_function,  yeccpars2_36_/1}).
--file("src/TPTP_parser.yrl", 52).
+-file("src/TPTP_parser.yrl", 54).
 yeccpars2_36_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1192,7 +1192,7 @@ yeccpars2_36_(__Stack0) ->
 -compile({inline,yeccpars2_37_/1}).
 -dialyzer({nowarn_function, yeccpars2_37_/1}).
 -compile({nowarn_unused_function,  yeccpars2_37_/1}).
--file("src/TPTP_parser.yrl", 49).
+-file("src/TPTP_parser.yrl", 51).
 yeccpars2_37_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1202,7 +1202,7 @@ yeccpars2_37_(__Stack0) ->
 -compile({inline,yeccpars2_38_/1}).
 -dialyzer({nowarn_function, yeccpars2_38_/1}).
 -compile({nowarn_unused_function,  yeccpars2_38_/1}).
--file("src/TPTP_parser.yrl", 50).
+-file("src/TPTP_parser.yrl", 52).
 yeccpars2_38_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1212,7 +1212,7 @@ yeccpars2_38_(__Stack0) ->
 -compile({inline,yeccpars2_39_/1}).
 -dialyzer({nowarn_function, yeccpars2_39_/1}).
 -compile({nowarn_unused_function,  yeccpars2_39_/1}).
--file("src/TPTP_parser.yrl", 32).
+-file("src/TPTP_parser.yrl", 34).
 yeccpars2_39_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1222,7 +1222,7 @@ yeccpars2_39_(__Stack0) ->
 -compile({inline,yeccpars2_41_/1}).
 -dialyzer({nowarn_function, yeccpars2_41_/1}).
 -compile({nowarn_unused_function,  yeccpars2_41_/1}).
--file("src/TPTP_parser.yrl", 29).
+-file("src/TPTP_parser.yrl", 31).
 yeccpars2_41_(__Stack0) ->
  [___9,___8,___7,___6,___5,___4,___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1232,7 +1232,7 @@ yeccpars2_41_(__Stack0) ->
 -compile({inline,yeccpars2_42_/1}).
 -dialyzer({nowarn_function, yeccpars2_42_/1}).
 -compile({nowarn_unused_function,  yeccpars2_42_/1}).
--file("src/TPTP_parser.yrl", 33).
+-file("src/TPTP_parser.yrl", 35).
 yeccpars2_42_(__Stack0) ->
  [___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1242,7 +1242,7 @@ yeccpars2_42_(__Stack0) ->
 -compile({inline,yeccpars2_46_/1}).
 -dialyzer({nowarn_function, yeccpars2_46_/1}).
 -compile({nowarn_unused_function,  yeccpars2_46_/1}).
--file("src/TPTP_parser.yrl", 56).
+-file("src/TPTP_parser.yrl", 58).
 yeccpars2_46_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1252,7 +1252,7 @@ yeccpars2_46_(__Stack0) ->
 -compile({inline,yeccpars2_48_/1}).
 -dialyzer({nowarn_function, yeccpars2_48_/1}).
 -compile({nowarn_unused_function,  yeccpars2_48_/1}).
--file("src/TPTP_parser.yrl", 57).
+-file("src/TPTP_parser.yrl", 59).
 yeccpars2_48_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1262,7 +1262,7 @@ yeccpars2_48_(__Stack0) ->
 -compile({inline,yeccpars2_49_/1}).
 -dialyzer({nowarn_function, yeccpars2_49_/1}).
 -compile({nowarn_unused_function,  yeccpars2_49_/1}).
--file("src/TPTP_parser.yrl", 41).
+-file("src/TPTP_parser.yrl", 43).
 yeccpars2_49_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1272,7 +1272,7 @@ yeccpars2_49_(__Stack0) ->
 -compile({inline,yeccpars2_51_/1}).
 -dialyzer({nowarn_function, yeccpars2_51_/1}).
 -compile({nowarn_unused_function,  yeccpars2_51_/1}).
--file("src/TPTP_parser.yrl", 36).
+-file("src/TPTP_parser.yrl", 38).
 yeccpars2_51_(__Stack0) ->
  [___4,___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1282,7 +1282,7 @@ yeccpars2_51_(__Stack0) ->
 -compile({inline,yeccpars2_57_/1}).
 -dialyzer({nowarn_function, yeccpars2_57_/1}).
 -compile({nowarn_unused_function,  yeccpars2_57_/1}).
--file("src/TPTP_parser.yrl", 20).
+-file("src/TPTP_parser.yrl", 21).
 yeccpars2_57_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1292,7 +1292,7 @@ yeccpars2_57_(__Stack0) ->
 -compile({inline,yeccpars2_61_/1}).
 -dialyzer({nowarn_function, yeccpars2_61_/1}).
 -compile({nowarn_unused_function,  yeccpars2_61_/1}).
--file("src/TPTP_parser.yrl", 21).
+-file("src/TPTP_parser.yrl", 22).
 yeccpars2_61_(__Stack0) ->
  [___1 | __Stack] = __Stack0,
  [begin
@@ -1302,7 +1302,7 @@ yeccpars2_61_(__Stack0) ->
 -compile({inline,yeccpars2_64_/1}).
 -dialyzer({nowarn_function, yeccpars2_64_/1}).
 -compile({nowarn_unused_function,  yeccpars2_64_/1}).
--file("src/TPTP_parser.yrl", 17).
+-file("src/TPTP_parser.yrl", 18).
 yeccpars2_64_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1312,7 +1312,7 @@ yeccpars2_64_(__Stack0) ->
 -compile({inline,yeccpars2_65_/1}).
 -dialyzer({nowarn_function, yeccpars2_65_/1}).
 -compile({nowarn_unused_function,  yeccpars2_65_/1}).
--file("src/TPTP_parser.yrl", 18).
+-file("src/TPTP_parser.yrl", 19).
 yeccpars2_65_(__Stack0) ->
  [___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1322,7 +1322,7 @@ yeccpars2_65_(__Stack0) ->
 -compile({inline,yeccpars2_67_/1}).
 -dialyzer({nowarn_function, yeccpars2_67_/1}).
 -compile({nowarn_unused_function,  yeccpars2_67_/1}).
--file("src/TPTP_parser.yrl", 15).
+-file("src/TPTP_parser.yrl", 16).
 yeccpars2_67_(__Stack0) ->
  [___9,___8,___7,___6,___5,___4,___3,___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1332,7 +1332,7 @@ yeccpars2_67_(__Stack0) ->
 -compile({inline,yeccpars2_68_/1}).
 -dialyzer({nowarn_function, yeccpars2_68_/1}).
 -compile({nowarn_unused_function,  yeccpars2_68_/1}).
--file("src/TPTP_parser.yrl", 19).
+-file("src/TPTP_parser.yrl", 20).
 yeccpars2_68_(__Stack0) ->
  [___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1352,7 +1352,7 @@ yeccpars2_69_(__Stack0) ->
 -compile({inline,yeccpars2_70_/1}).
 -dialyzer({nowarn_function, yeccpars2_70_/1}).
 -compile({nowarn_unused_function,  yeccpars2_70_/1}).
--file("src/TPTP_parser.yrl", 27).
+-file("src/TPTP_parser.yrl", 28).
 yeccpars2_70_(__Stack0) ->
  [___2,___1 | __Stack] = __Stack0,
  [begin
@@ -1360,4 +1360,4 @@ yeccpars2_70_(__Stack0) ->
   end | __Stack].
 
 
--file("src/TPTP_parser.yrl", 74).
+-file("src/TPTP_parser.yrl", 77).

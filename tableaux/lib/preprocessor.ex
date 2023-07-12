@@ -3,7 +3,7 @@ defmodule PrePro do
   # all the preprocessing steps we do on the expression
   @spec preprocess(any, any) :: any
   def preprocess(expression, orderfunc\\&Enum.sort/1) do
-    preprocess_quantifiers(order(expression, orderfunc))
+    preprocess_quantifiers(Logic.nnf(order(expression, orderfunc)))
   end
 
   # orders all arguments of nary operators according to orderfunc
@@ -38,8 +38,8 @@ defmodule PrePro do
   # [:X, :Y] ==> %{:X => :qVar_X, :Y => :qVar_Y}
   def get_substitution_for_quantified_vars(varlist) do
     case varlist do
-      [v | []] -> %{v => String.to_atom("qVar_" <> Atom.to_string(v))}
-      [v | vs] -> Map.merge(%{v => String.to_atom("qVar_" <> Atom.to_string(v))}, get_substitution_for_quantified_vars(vs))
+      [v | []] -> %{v => String.to_atom("QVar_" <> Atom.to_string(v))}
+      [v | vs] -> Map.merge(%{v => String.to_atom("QVar_" <> Atom.to_string(v))}, get_substitution_for_quantified_vars(vs))
     end
   end
 end
