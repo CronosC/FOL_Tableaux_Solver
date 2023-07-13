@@ -1,9 +1,10 @@
 defmodule Logic do
 
-  def expr_q() do
+  def expr_quant() do
     {:not, {:exqu, [:A], {:allqu, [:B], {:exqu, [:C, :D], {:or, [:A, {:f, [:A, :B, :C, :D]}]}}}}}
   end
 
+  @spec expr_unsat :: {:and, [:A | {:not, :D} | {:or, [...]}, ...]}
   def expr_unsat() do
     {:and, [:A, {:or, [:C, :D]}, {:or, [{:not, :A}, :D]}, {:not, :D}]}
   end
@@ -46,7 +47,7 @@ defmodule Logic do
   def variable?(expression) do
     case expression do
       x when is_atom(x) ->
-        <<first::utf8>> <> _ = Atom.to_string(expression) # pattern matches s.t. first is the first char in expression
+        <<first::binary-size(1)>> <> _ = Atom.to_string(expression) # pattern matches s.t. first is the first char in expression
         first =~ ~r/^\p{Lu}$/u  # regex that checks for uppercase
       _ -> :false
     end
@@ -156,6 +157,61 @@ defmodule Logic do
             IO.inspect(x)
             :false
         end
+    end
+  end
+
+  # finds a most general unifier for two expressions, if one exists
+  def unify(expressions1, expressions2) do
+    if Enum.all?(Enum.map(expressions1 ++ expressions2, fn x -> atomic?(x) end)) and length(expressions1) == length(expressions2) do
+      unify_MM(expressions1, expressions2)
+    else
+      :error_unification_not_possible
+  end
+
+  end
+
+  # unification helper method that implements unification according to Martelli/Montanari
+  defp unify_MM(expressions1, expressions2) do
+    case {expressions1, expressions2} do
+      {[], []} -> %{}
+      {[x | x1s], [x | x2s]} -> unify_MM(x1s, x2s)
+      {[{f, x1} | x1s], [{f, x2} | x2s]} ->
+        if length(x1) == length(x2) do
+          unify_MM(x1s ++ x1, x2s ++ x2)    # unify([f(a, C)], [f(X, Y)]) == unify([a, C], [X, Y])
+        else
+          :error_unification_not_possible1
+        end
+      {[{_f, _} | _], [[{_g, _} | _]]} -> :error_unification_not_possible2
+      {[ x1 | x1s], [ x2 | x2s]} -> if variable?(x1) or variable?(x2) do
+        if variable?(x1) do
+          if not occurs_free(x1, x2) do
+            Map.merge(%{x1 => x2}, unify_MM(x1s, x2s))
+          else
+            :error_unification_not_possible3
+          end
+        else
+          if not occurs_free(x2, x1) do
+            Map.merge(%{x2 => x1}, unify_MM(x1s, x2s))
+          else
+            :error_unification_not_possible4
+          end
+        end
+        else
+            :error_unification_not_possible5
+        end
+        x ->
+          IO.puts("Forgotten case in unify_MM!")
+          IO.puts(x)
+          :false
+    end
+  end
+
+  defp occurs_free(x, t) do
+    case t do
+      y when is_list(y) -> Enum.any?(Enum.map(y, fn t_i -> occurs_free(x, t_i) end))
+      {_, y} -> occurs_free(x, y)
+      ^x -> :true
+      _y -> :false
     end
   end
 

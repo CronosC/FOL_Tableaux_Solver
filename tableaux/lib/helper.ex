@@ -8,7 +8,7 @@ defmodule Helper do
     expressions = Enum.map(files, fn {:ok, x} ->Parser.parse_TPTP_from_str(x)end)
     IO.puts("Parsed files..")
     results = Enum.map(expressions, fn x -> Tableaux.proof(x) end)
-    IO.inspect(Enum.zip(dir_contents, results))
+    Enum.zip(dir_contents, results)
   end
 
   def proof(file) do

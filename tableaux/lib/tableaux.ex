@@ -20,10 +20,6 @@ defmodule Tableaux do
   '''
 
   '''
-    Unificiation
-  '''
-
-  '''
   Notes:
     - applying heuristic in each step is inefficient: change patterns s.t. beta always goes at the end, rest at the front?
   '''
@@ -49,8 +45,8 @@ defmodule Tableaux do
     else
       # check if we can still apply more steps
       if done?(expressions) do
-        IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
-        IO.inspect(expressions)
+        #IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
+        #IO.inspect(expressions)
         :true
       else
         expressions = remove_duplicates(expressions)
