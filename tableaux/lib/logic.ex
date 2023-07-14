@@ -1,7 +1,7 @@
 defmodule Logic do
 
   #############################################
-  ######## TEST "CONSTANTS" ###################
+  ######## TEST DEFINITIONS ###################
   #############################################
 
   def expr_quant() do
@@ -12,6 +12,7 @@ defmodule Logic do
   def expr_unsat() do
     {:and, [:A, {:or, [:C, :D]}, {:or, [{:not, :A}, :D]}, {:not, :D}]}
   end
+
 
   def expr_sat() do
     {:not, expr_unsat()}
@@ -29,8 +30,8 @@ defmodule Logic do
           {:allqu, v, x} -> if Enum.all?(Enum.map(v, &atomic?/1)) do wff?(x) else :false end
           {:exqu, v, x} -> if Enum.all?(Enum.map(v, &atomic?/1)) do wff?(x) else :false end
           {:not, x} -> wff?(x)
-          {:and, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
-          {:or, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
+          {:and, ops} -> if length(ops) >= 1 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
+          {:or, ops} -> if length(ops) >= 1 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
           #{:nand, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
           #{:nor, ops} -> if length(ops) >= 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
           #{:rimp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end

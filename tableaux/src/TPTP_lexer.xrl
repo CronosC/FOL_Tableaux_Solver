@@ -7,7 +7,7 @@ COMMENT      = %.*\n
 
 Rules.
 
-%% negated_conjecture : {token, {neg_conj, TokenChars}}.
+negated_conjecture : {token, {neg_conj, TokenChars}}.
 fof           : {token, {start_fof, TokenChars}}.
 cnf           : {token, {start_cnf, TokenChars}}.
 {SYM}         : {token, {sym, to_atom(TokenChars)}}.

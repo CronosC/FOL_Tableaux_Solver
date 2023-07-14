@@ -16,14 +16,14 @@ S -> fof_wrapperlist : {'and', '$1'}.
 cnf_wrapperlist -> cnf_wrapper : ['$1'].
 cnf_wrapperlist -> cnf_wrapper cnf_wrapperlist : ['$1'] ++ '$2'.
 
-%%cnf_wrapper -> start_cnf '(' sym ',' neg_conj ',' cnf_formula ')' '.' : negate('$7').
+cnf_wrapper -> start_cnf '(' sym ',' neg_conj ',' cnf_formula ')' '.' : negate('$7').
 cnf_wrapper -> start_cnf '(' sym ',' sym ',' cnf_formula ')' '.' : '$7'.
 
 cnf_formula -> '(' cnf_formula ')' : '$2'.
 cnf_formula -> cnf_formula op_binary cnf_formula : {'$2', ['$1', '$3']}.
 cnf_formula -> op_unary cnf_formula : {'$1', '$2'}.
 cnf_formula -> predicate : '$1'.
-cnf_formula -> sym  : '$1'.
+cnf_formula -> sym  : extract_token('$1').
 
 
 %%%%%%% FOF %%%%%%%%%%
@@ -31,7 +31,7 @@ cnf_formula -> sym  : '$1'.
 fof_wrapperlist -> fof_wrapper : ['$1'].
 fof_wrapperlist -> fof_wrapper fof_wrapperlist : ['$1'] ++ '$2'.
 
-%%fof_wrapper -> start_fof '(' sym ',' neg_conj ',' fof_formula ')' '.' : negate('$7').
+fof_wrapper -> start_fof '(' sym ',' neg_conj ',' fof_formula ')' '.' : negate('$7').
 fof_wrapper -> start_fof '(' sym ',' sym ',' fof_formula ')' '.' : '$7'.
 
 fof_formula -> '(' fof_formula ')' : '$2'.
@@ -74,4 +74,4 @@ arglist -> predicate ',' arglist : ['$1'] ++ '$3'.
 Erlang code.
 extract_token({_Token, Value}) -> Value.
 extract_atom({Token, _Value}) -> Token.
-%% negate(X) -> {'not', X}.
+negate(X) -> {'not', X}.
