@@ -12,17 +12,26 @@ defmodule Tableaux do
         except not, which is:
         {:not, operand}
     Variables are uppercase, constants lowercase.
-    Predicates are possible. They are defined in the same way:
+    Predicates are possible. They are defined in the same way as operators:
         P(a, b) == {:P, [:a, :b]}
     Quantifiers are possible:
-        \forall x, y phi == {:allqu, [x, y], phi}
-        \existence x phi == {:exqu, [x], phi}
+        \forall x, y : phi == {:allqu, [x, y], phi}
+        \existence x : phi == {:exqu, [x], phi}
   '''
+
 
   '''
   Notes:
+    x some tests
+    x see notes in logic (unify)
+    - instantiation method
+    - find bug in tableaux
+    x Signature explizit machen
+    - tableaux with unification?  =>> copy whole tableaux for each unification?
+    - resolution with unification?
     - applying heuristic in each step is inefficient: change patterns s.t. beta always goes at the end, rest at the front?
   '''
+
   # Start the tableaux proof by contradiction
   def proof(expression, firsth\\&Function.identity/1, orderfunc\\&Enum.sort/1) do
     if Logic.wff?(expression) do
@@ -30,7 +39,7 @@ defmodule Tableaux do
       not Tableaux.sat?([{:not, expression}], firsth)
     else
       IO.puts("Expression is invalid!")
-      :error
+      :error_invalid_expression
     end
   end
 
@@ -45,8 +54,8 @@ defmodule Tableaux do
     else
       # check if we can still apply more steps
       if done?(expressions) do
-        #IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
-        #IO.inspect(expressions)
+        IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
+        IO.inspect(expressions)
         :true
       else
         expressions = remove_duplicates(expressions)
@@ -67,9 +76,9 @@ defmodule Tableaux do
 
           # alpha
           [{:and, operands} | tail] ->
-            sat?(operands ++ tail, firsth)
+            sat?(tail ++ operands, firsth)
           [{:not, {:or, operands}} | tail] ->
-            sat?(Logic.negate(operands) ++ tail, firsth)
+            sat?(tail ++ Logic.negate(operands), firsth)
 
           # beta
           [{:or, operands} | tail] ->
@@ -79,7 +88,7 @@ defmodule Tableaux do
             end
             Enum.any?(tasks)
             '''
-            Enum.any?(Enum.map(operands, fn x -> sat?([x] ++ tail, firsth) end))
+            Enum.any?(Enum.map(operands, fn x -> sat?(tail ++ [x], firsth) end))
 
           [{:not, {:and, operands}} | tail] ->
             operands = Logic.negate(operands)
@@ -89,11 +98,11 @@ defmodule Tableaux do
             end
             Enum.any?(tasks)
             '''
-            Enum.any?(Enum.map(operands, fn x -> sat?([x] ++ tail, firsth) end))
+            Enum.any?(Enum.map(operands, fn x -> sat?(tail ++ [x], firsth) end))
 
 
           # else literal in front => ignore
-          [x | tail] -> if Logic.atomic?(x) do sat?(tail ++ [x], firsth) else IO.puts("This should never occur! Missing case in sat.") end
+          [x | tail] -> if Logic.atomic?(x) do sat?(tail ++ [x], firsth) else :error_missing_case end
         end
       end
     end
@@ -116,7 +125,7 @@ defmodule Tableaux do
     end
   end
 
-  # checks if list of expressions only contains literals
+  # checks if list of expressions only contains atomic expressions
   def done?(expressions) do
     case expressions do
       [] -> :true

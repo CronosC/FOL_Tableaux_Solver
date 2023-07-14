@@ -1,5 +1,9 @@
 defmodule Logic do
 
+  #############################################
+  ######## TEST "CONSTANTS" ###################
+  #############################################
+
   def expr_quant() do
     {:not, {:exqu, [:A], {:allqu, [:B], {:exqu, [:C, :D], {:or, [:A, {:f, [:A, :B, :C, :D]}]}}}}}
   end
@@ -13,6 +17,9 @@ defmodule Logic do
     {:not, expr_unsat()}
   end
 
+  #############################################
+  ######## CHECKS #############################
+  #############################################
 
   # checks syntactic correctness of an expression
   def wff?(expression) do
@@ -30,9 +37,14 @@ defmodule Logic do
           #{:limp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
           #{:nrimp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
           #{:nlimp, ops} -> if length(ops) == 2 do Enum.all?(Enum.map(ops, &wff?/1)) else :false end
+          {f, x} -> if not operator?(f) and not atomic?({f, x}) do :false else
+            IO.puts("Forgotten case in wff?!")
+            IO.inspect({f, x})
+            :error_missing_case
+          end
           x -> IO.puts("Forgotten case in wff?!")
                IO.inspect(x)
-               :false
+               :error_missing_case
         end
       end
     end
@@ -46,6 +58,7 @@ defmodule Logic do
   # checks if something is a variable
   def variable?(expression) do
     case expression do
+      x when is_list(x) -> Enum.all?(Enum.map(x, fn y -> variable?(y) end))
       x when is_atom(x) ->
         <<first::binary-size(1)>> <> _ = Atom.to_string(expression) # pattern matches s.t. first is the first char in expression
         first =~ ~r/^\p{Lu}$/u  # regex that checks for uppercase
@@ -56,6 +69,7 @@ defmodule Logic do
   # checks if something is a constant
   def constant?(expression) do
     case expression do
+      x when is_list(x) -> Enum.all?(Enum.map(x, fn y -> constant?(y) end))
       x when is_atom(x) -> not variable?(x)
       _ -> :false
     end
@@ -64,6 +78,7 @@ defmodule Logic do
   # checks if something is a predicate
   def predicate?(expression) do
     case expression do
+      x when is_list(x) -> Enum.all?(Enum.map(x, fn y -> predicate?(y) end))
       {f, x} -> not operator?(f) and Enum.all?(Enum.map(x, &atomic?/1))
       _ -> :false
     end
@@ -81,6 +96,65 @@ defmodule Logic do
     end
   end
 
+  #############################################
+  ######## INFER SIGNATURE ####################
+  #############################################
+
+  def get_Signature(expressions) do
+    %{:Relations => get_Relations(expressions), :Functions => get_Functions(expressions), :Constants => get_Constants(expressions), :Variables => get_Variables(expressions)}
+  end
+
+  defp get_Relations(expressions) do
+    case expressions do
+      x when is_list(x) -> Enum.reduce(Enum.map(x, fn x -> get_Relations(x) end), fn x, y -> x ++ y end)
+      {f, x} -> if operator?(f) do get_Relations(x) else [f] ++ get_Relations(x) end
+      {_q, _v, x} -> get_Relations(x)
+      x -> if atomic?(x) do [] else
+        IO.puts("Forgotten case in get_Relations!")
+        IO.inspect(x)
+        :error_missing_case
+      end
+    end
+  end
+
+  defp get_Functions(_expressions) do
+    []
+  end
+
+  defp get_Constants(expressions) do
+    case expressions do
+      x when is_list(x) -> Enum.reduce(Enum.map(x, fn x -> get_Constants(x) end), fn x, y -> x ++ y end)
+      {_f, x} -> get_Constants(x)
+      {_q, _v, x} -> get_Constants(x)
+      x -> if constant?(x) do [x] else
+        if variable?(x) do [] else
+          IO.puts("Forgotten case in get_Constants!")
+          IO.inspect(x)
+          :error_missing_case
+        end
+      end
+    end
+  end
+
+  defp get_Variables(expressions) do
+    case expressions do
+      x when is_list(x) -> Enum.reduce(Enum.map(x, fn x -> get_Variables(x) end), fn x, y -> x ++ y end)
+      {_f, x} -> get_Variables(x)
+      {_q, _v, x} -> get_Variables(x)
+      x -> if variable?(x) do [x] else
+        if constant?(x) do [] else
+          IO.puts("Forgotten case in get_Variables!")
+          IO.inspect(x)
+          :error_missing_case
+        end
+      end
+    end
+  end
+
+  #############################################
+  ######## TRANSFORMATIONS ####################
+  #############################################
+
   # negates an expression
   def negate(expressions) do
     case expressions do
@@ -91,10 +165,6 @@ defmodule Logic do
       x -> {:not, x}
     end
   end
-
-  #############################################
-  ######## TRANSFORMATIONS ####################
-  #############################################
 
   # theta is a substitution map, the method looks for occurences of keys of theta in formula and replaces them with the assosiacted values
   def substitute(formula, theta) do
@@ -122,7 +192,7 @@ defmodule Logic do
       x -> if atomic?(x) do x else
         IO.puts("Forgotten case in nnf!")
         IO.inspect(x)
-        :false
+        :error_missing_case
       end
     end
   end
@@ -139,7 +209,7 @@ defmodule Logic do
       x -> if atomic?(x) do x else
         IO.puts("Forgotten case in skolemization!")
         IO.inspect(x)
-        :false
+        :error_missing_case
       end
     end
   end
@@ -155,7 +225,7 @@ defmodule Logic do
           x ->
             IO.puts("Forgotten case in get_skolem_substitution!")
             IO.inspect(x)
-            :false
+            :error_missing_case
         end
     end
   end
@@ -177,32 +247,32 @@ defmodule Logic do
       {[x | x1s], [x | x2s]} -> unify_MM(x1s, x2s)
       {[{f, x1} | x1s], [{f, x2} | x2s]} ->
         if length(x1) == length(x2) do
-          unify_MM(x1s ++ x1, x2s ++ x2)    # unify([f(a, C)], [f(X, Y)]) == unify([a, C], [X, Y])
+          unify_MM(x1 ++ x1s, x2 ++ x2s)    # unify([f(a, C)], [f(X, Y)]) == unify([a, C], [X, Y])
         else
-          :error_unification_not_possible1
+          :error_unification_not_possible
         end
-      {[{_f, _} | _], [[{_g, _} | _]]} -> :error_unification_not_possible2
+      {[{_f, _} | _], [[{_g, _} | _]]} -> :error_unification_not_possible
       {[ x1 | x1s], [ x2 | x2s]} -> if variable?(x1) or variable?(x2) do
         if variable?(x1) do
           if not occurs_free(x1, x2) do
-            Map.merge(%{x1 => x2}, unify_MM(x1s, x2s))
+            Map.merge(%{x1 => x2}, unify_MM(substitute(x1s, %{x1 => x2}), substitute(x2s, %{x1 => x2})))
           else
-            :error_unification_not_possible3
+            :error_unification_not_possible
           end
         else
           if not occurs_free(x2, x1) do
-            Map.merge(%{x2 => x1}, unify_MM(x1s, x2s))
+            Map.merge(%{x2 => x1}, unify_MM(substitute(x1s, %{x2 => x1}), substitute(x2s, %{x2 => x1})))
           else
-            :error_unification_not_possible4
+            :error_unification_not_possible
           end
         end
         else
-            :error_unification_not_possible5
+            :error_unification_not_possible
         end
         x ->
           IO.puts("Forgotten case in unify_MM!")
-          IO.puts(x)
-          :false
+          IO.inspect(x)
+          :error_missing_case
     end
   end
 

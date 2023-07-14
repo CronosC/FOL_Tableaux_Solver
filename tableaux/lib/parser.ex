@@ -2,6 +2,10 @@ defmodule Parser do
   @moduledoc """
   leex and yecc based parser for the TPTP language.
   """
+  def parse_KR() do
+    parse_file("../data/tptp/cnf_sat/KRS005-1.p")
+  end
+
   def lex(str) do
     :TPTP_lexer.string(to_charlist(str))
   end
@@ -11,10 +15,6 @@ defmodule Parser do
   end
 
   def parse(str) do
-    :TPTP_parser.parse(:TPTP_lexer.string(to_charlist(str)))
-  end
-
-  def parse_TPTP_from_str(str) do
     {errorcode_lex, tokens, _} = :TPTP_lexer.string(to_charlist(str))
     case errorcode_lex do
       :ok ->
@@ -33,10 +33,10 @@ defmodule Parser do
     end
   end
 
-  def parse_TPTP_from_file(path) do
+  def parse_file(path) do
     {errorcode_read, file_str} = File.read(path)
     case errorcode_read do
-      :ok -> parse_TPTP_from_str(file_str)
+      :ok -> parse(file_str)
       _ ->
         IO.puts("Error reading file!")
         :error_read_file
