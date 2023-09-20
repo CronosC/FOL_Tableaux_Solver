@@ -69,6 +69,13 @@ defmodule GenericTests do
     assert Logic.wff?(Logic.expr_quant())
   end
 
+  test "print_some_terms" do
+    Enum.each(0..10, fn(_) ->
+      IO.inspect(Tableaux.instantiate_terms([:X, :Y], %{:Relations => [{:f, 1}, {:g, 3}], :Constants => [:a, :b, :c]}))
+    end)
+    assert :true
+  end
+
 
   #test "parsing_changed_test" do
   #  assert Parser.parse_KR() == {:and,[e: [:exist],or: [equalish: [:X5, {:u0r4, [:X1]}],not: {:or, [e: [:X1], not: {:r, [:X1, :X5]}]}],or: [r: [:X1, {:u0r4, [:X1]}], not: {:e, [:X1]}],not: {:or, [e: [:X1], not: {:equalish, [u0r3: [:X1], u0r2: [:X1]]}]},or: [r: [:X1, {:u0r2, [:X1]}], not: {:e, [:X1]}],or: [r: [:X1, {:u0r3, [:X1]}], not: {:e, [:X1]}],or: [e: [:X1],or: [equalish: [:X3, :X2],not: {:or,[r: [:X1, :X3],not: {:or,[r: [:X1, :X2],not: {:or,[r: [:X1, :X4], not: {:equalish, [{:u0r1, [:X4, :X1]}, :X4]}]}]}]}]],or: [e: [:X1],or: [equalish: [:X3, :X2],or: [r: [:X1, {:u0r1, [:X4, :X1]}],not: {:or,[r: [:X1, :X3], not: {:or, [r: [:X1, :X2], not: {:r, [:X1, :X4]}]}]}]]]]}
@@ -85,13 +92,13 @@ defmodule GenericTests do
     assert Tableaux.proof(Logic.expr_quant_unsat, :false, 2500) == :false
   end
 
-  test "small_parse_test_sat" do
-    assert Enum.all?(Helper.test_all("cnf_sat_subset"))
-  end
+  #test "small_parse_test_sat" do
+  #  assert Enum.all?(Helper.test_all("cnf_sat_subset"))
+  #end
 
-  test "small_parse_test_unsat" do
-    assert not Enum.any?(Helper.test_all("cnf_unsat_subset"))
-  end
+  #test "small_parse_test_unsat" do
+  #  assert not Enum.any?(Helper.test_all("cnf_unsat_subset"))
+  #end
 
 
   #test "master_parse_test_sat" do

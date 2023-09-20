@@ -116,7 +116,7 @@ defmodule Logic do
       [] -> []
       x when is_list(x) ->
         Enum.concat(Enum.map(x, fn y -> get_Relations(y) end))
-      {f, x} -> if operator?(f) do get_Relations(x) else [f] ++ get_Relations(x) end
+      {f, x} -> if operator?(f) do get_Relations(x) else [{f, length(x)}] ++ get_Relations(x) end
       {_q, _v, x} ->
         get_Relations(x)
       x -> if atomic?(x) do []

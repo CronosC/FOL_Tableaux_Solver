@@ -124,7 +124,7 @@ defmodule Tableaux do
 
             # gamma: instantiate existence quantors with new constants
             [ {:exqu, v, x} | tail ] ->
-              theta = instantiate_variables(v, sig)
+              theta = instantiate_parameters(v, sig)
               new_expressions = [Logic.substitute(x, theta)] ++ tail
               new_sig = Logic.get_Signature(new_expressions)
               sat?(new_expressions, firsth, new_sig, maxdepth - 1)
@@ -133,7 +133,7 @@ defmodule Tableaux do
             # delta
             [ {:allqu, v, x} | tail ] ->
               chosen_var = Enum.random(v)
-              theta = instantiate_variables([chosen_var], sig)
+              theta = instantiate_terms([chosen_var], sig)
               if length(v) > 1 do
                 filtered_v = for a when a != chosen_var <- v, do: a
                 new_expressions =  tail ++ [{:allqu, filtered_v, Logic.substitute(x, theta)}] ++ [{:allqu, v, x}]
@@ -158,37 +158,44 @@ defmodule Tableaux do
     end
   end
 
-  # Creates a substitution map for new constants given a variable list.
-  def instantiate_variables(varlist, sig) do
-    %{Constants: consts} = sig
-    if Enum.random([1, 2]) == 1 and consts != [] do
-      case varlist do
-        [] -> %{}
-        [v | vs] ->
-          const_to_inst = Enum.random(consts)
-          Map.merge(%{v => const_to_inst}, instantiate_variables(vs, sig))
-      end
+  def instantiate_terms(varlist, sig) do
+    case varlist do
+      [] -> %{}
+      [v | vs] ->
+        new_term = create_term(sig)
+        Map.merge(%{v => new_term}, instantiate_terms(vs, sig))
+    end
+  end
 
+  def create_term(sig, max_recursion\\2) do
+    if max_recursion <= 0 do
+      Enum.random(sig[:Constants])
     else
-      case varlist do
-        [] -> %{}
-        [v | vs] ->
-          new_c = String.to_atom("i_" <> Atom.to_string(v))
-          if new_c in sig[:Constants] do
-            new_c = get_new_constants(sig)
-            new_sig = %{sig | :Constants => (sig[:Constants] ++ [new_c])}
-            Map.merge(%{v => new_c}, instantiate_variables(vs, new_sig))
-          else
-            new_sig = %{sig | :Constants => (sig[:Constants] ++ [new_c])}
-            Map.merge(%{v => new_c}, instantiate_variables(vs, new_sig))
-          end
+      choices = sig[:Constants] ++ sig[:Relations]
+      choice = Enum.random(choices)
+      case choice do
+        {f, a} ->
+          arguments = Enum.map(1..a, fn(_) -> create_term(sig, max_recursion - 1) end)
+          {f, arguments}
+        c -> c
       end
+    end
+  end
+
+  # Creates a substitution map for new constants given a variable list.
+  def instantiate_parameters(varlist, sig) do
+    case varlist do
+      [] -> %{}
+      [v | vs] ->
+        new_c = get_new_constants(sig)
+        new_sig = %{sig | :Constants => (sig[:Constants] ++ [new_c])}
+        Map.merge(%{v => new_c}, instantiate_parameters(vs, new_sig))
     end
   end
 
   # creates a new atom representing a constant given a signature.
   def get_new_constants(sig) do
-    rand_const = String.to_atom("i_" <> for _ <- 1..5, into: "", do: <<Enum.random(?a..?z)>>)
+    rand_const = String.to_atom("p_" <> for _ <- 1..5, into: "", do: <<Enum.random(?a..?z)>>)
     if rand_const in sig[:Constants] do
       get_new_constants(sig) # retry
     else
@@ -209,15 +216,15 @@ defmodule Tableaux do
     case expressions do
       [] -> :false
       [{:not, phi} | tail] -> if phi in tail do
-        #IO.puts("Contradiction found!")
-        #IO.inspect(phi)
-        #IO.inspect({:not, phi})
+        IO.puts("Contradiction found!")
+        IO.inspect(phi)
+        IO.inspect({:not, phi})
         :true
       else contradiction?(tail) end
       [phi | tail] -> if {:not, phi} in tail do
-        #IO.puts("Contradiction found!")
-        #IO.inspect(phi)
-        #IO.inspect({:not, phi})
+        IO.puts("Contradiction found!")
+        IO.inspect(phi)
+        IO.inspect({:not, phi})
         :true
       else contradiction?(tail) end
     end
