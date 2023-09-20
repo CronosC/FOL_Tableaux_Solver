@@ -8,11 +8,18 @@ defmodule Logic do
     {:not, {:exqu, [:A], {:allqu, [:B], {:exqu, [:C, :D], {:or, [:A, {:f, [:A, :B, :C, :D]}]}}}}}
   end
 
+  def expr_quant_sat() do
+    {:and, [{:allqu, [:X], {:f, [:X]}}, {:exqu, [:Y], {:g, [:X, :Y]}}, {:or, [{:not, {:f, [:x]}}, {:h, [:X, :Y, :X]}]} ]}
+  end
+
+  def expr_quant_unsat() do
+    {:and, [{:allqu, [:X], {:f, [:X]}}, {:g, [:X, :Y]}, {:or, [{:not, {:g, [:y]}}, {:h, [:X, :Y, :X]}]}, {:exqu, [:Z], {:not, {:f, [:Z]}}}]}
+  end
+
   @spec expr_unsat :: {:and, [:A | {:not, :D} | {:or, [...]}, ...]}
   def expr_unsat() do
     {:and, [:A, {:or, [:C, :D]}, {:or, [{:not, :A}, :D]}, {:not, :D}]}
   end
-
 
   def expr_sat() do
     {:not, expr_unsat()}
@@ -91,7 +98,6 @@ defmodule Logic do
       x when is_list(x) -> Enum.all?(Enum.map(x, &atomic?/1))
       {:not, x} -> atomic?(x)
       {_, _, _} -> :false  # must be quantor
-      {f, x} when is_list(x) -> (not operator?(f)) and atomic?(x)
       {f, x} -> (not operator?(f)) and atomic?(x)
       x when is_atom(x) -> not operator?(x)
     end
@@ -107,13 +113,17 @@ defmodule Logic do
 
   defp get_Relations(expressions) do
     case expressions do
-      x when is_list(x) -> Enum.reduce(Enum.map(x, fn x -> get_Relations(x) end), fn x, y -> x ++ y end)
+      [] -> []
+      x when is_list(x) ->
+        Enum.concat(Enum.map(x, fn y -> get_Relations(y) end))
       {f, x} -> if operator?(f) do get_Relations(x) else [f] ++ get_Relations(x) end
-      {_q, _v, x} -> get_Relations(x)
-      x -> if atomic?(x) do [] else
-        IO.puts("Forgotten case in get_Relations!")
-        IO.inspect(x)
-        :error_missing_case
+      {_q, _v, x} ->
+        get_Relations(x)
+      x -> if atomic?(x) do []
+        else
+          IO.puts("Forgotten case in get_Relations!")
+          IO.inspect(x)
+          :error_missing_case
       end
     end
   end

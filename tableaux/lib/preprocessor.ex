@@ -3,7 +3,8 @@ defmodule PrePro do
   # all the preprocessing steps we do on the expression
   @spec preprocess(any, any) :: any
   def preprocess(expression, orderfunc\\&Enum.sort/1) do
-    preprocess_quantifiers(order(expression, orderfunc))
+    #preprocess_quantifiers(order(expression, orderfunc))
+    order(expression, orderfunc)
   end
 
   # orders all arguments of nary operators according to orderfunc

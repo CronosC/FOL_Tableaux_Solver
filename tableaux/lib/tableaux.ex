@@ -24,19 +24,34 @@ defmodule Tableaux do
   Notes:
     x some tests
     x see notes in logic (unify)
-    - instantiation method
+    x instantiation method
+    - all quantor: dont instantiate new constant, unless no constants in signature
+    - additionally: Create any valid closed term from signature and instantiate it (all quantor)
+    - done check from beginning to end
+    - all quantor elimination via free variables
     - find bug in tableaux
     x Signature explizit machen
     - tableaux with unification?  =>> copy whole tableaux for each unification?
+      - unification only when we can close tableaux (or all unifications on that branch!)
+      - then restart whole tableaux with that substitution applied (as or)
     - resolution with unification?
     - applying heuristic in each step is inefficient: change patterns s.t. beta always goes at the end, rest at the front?
   '''
 
   # Start the tableaux proof by contradiction
-  def proof(expression, firsth\\&Function.identity/1, orderfunc\\&Enum.sort/1) do
+  @spec proof(atom | maybe_improper_list | {any, any} | {any, any, any}, any, any) ::
+          :error_invalid_expression | false | true
+  def proof(expression, negate\\true, maxdepth\\999999999, firsth\\&Function.identity/1, orderfunc\\&Enum.sort/1) do
     if Logic.wff?(expression) do
       expression = PrePro.preprocess(expression, orderfunc)
-      not Tableaux.sat?([{:not, expression}], firsth)
+      signature = Logic.get_Signature(expression)
+      if negate do
+        #IO.inspect({:not, expression})
+        not Tableaux.sat?([{:not, expression}], firsth, signature, maxdepth)
+      else
+        #IO.inspect(expression)
+        Tableaux.sat?([expression], firsth, signature, maxdepth)
+      end
     else
       IO.puts("Expression is invalid!")
       :error_invalid_expression
@@ -44,67 +59,140 @@ defmodule Tableaux do
   end
 
   # Core tableaux method
-  def sat?(expressions, firsth) do
-    #IO.puts("#{inspect(self())}: #{inspect(expressions)}")
-    #IO.inspect(expressions)
-    # check abort condition (phi and not phi)
-    if contradiction?(expressions) do
-      #IO.puts("#{inspect(self())}: Contradiction found!")
-      :false
+  def sat?(expressions, firsth, sig, maxdepth\\9999999) do
+    if maxdepth <= 0 do
+      IO.puts("Reached max depth, assuming sat..")
+      IO.inspect(expressions)
+      :true
     else
-      # check if we can still apply more steps
-      if done?(expressions) do
-        #IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
-        #IO.inspect(expressions)
-        :true
+      #IO.puts("#{inspect(self())}: #{inspect(expressions)}")
+      #IO.inspect(maxdepth)
+      #IO.inspect(expressions)
+      # check abort condition (phi and not phi)
+      if contradiction?(expressions) do
+        #IO.puts("#{inspect(self())}: Contradiction found!")
+        :false
       else
-        expressions = remove_duplicates(expressions)
-        expressions = firsth.(expressions) # sorting heuristic
-        # select fitting transformation step
-        case expressions do
-          # simple
-          [:true | _] ->
-            :true
-          [:false | tail] ->
-            sat?(tail, firsth)
-          [{:not, :true} | tail] ->
-            sat?(tail, firsth)
-          [{:not, :false} | _] ->
-            :true
-          [{:not, {:not, phi}} | tail] ->
-            sat?([phi] ++ tail, firsth)
+        # check if we can still apply more steps
+        if done?(expressions) do
+          #IO.puts("#{inspect(self())}: Can no longer apply any transformations!")
+          #IO.inspect(expressions)
+          #IO.puts("Can no longer apply any transformation steps => sat!")
+          :true
+        else
+          expressions = remove_duplicates(expressions)
+          expressions = firsth.(expressions) # sorting heuristic
+          # select fitting transformation step
+          case expressions do
+            # simple
+            [:true | _] ->
+              :true
+            [:false | tail] ->
+              sat?(tail, firsth, sig, maxdepth - 1)
+            [{:not, :true} | tail] ->
+              sat?(tail, firsth, sig, maxdepth - 1)
+            [{:not, :false} | _] ->
+              :true
+            [{:not, {:not, phi}} | tail] ->
+              sat?([phi] ++ tail, firsth, sig, maxdepth - 1)
 
-          # alpha
-          [{:and, operands} | tail] ->
-            sat?(tail ++ operands, firsth)
-          [{:not, {:or, operands}} | tail] ->
-            sat?(tail ++ Logic.negate(operands), firsth)
+            # alpha
+            [{:and, operands} | tail] ->
+              sat?(tail ++ operands, firsth, sig, maxdepth - 1)
+            [{:not, {:or, operands}} | tail] ->
+              sat?(tail ++ Logic.negate(operands), firsth, sig, maxdepth - 1)
 
-          # beta
-          [{:or, operands} | tail] ->
-            '''
-            tasks = for op <- operands do
-              do_async(fn -> sat?([op] ++ tail, firsth) end)
+            # beta
+            [{:or, operands} | tail] ->
+              '''
+              tasks = for op <- operands do
+                do_async(fn -> sat?([op] ++ tail, firsth, maxdepth - 1) end)
+              end
+              Enum.any?(tasks)
+              '''
+              Enum.any?(Enum.map(operands, fn x -> sat?(tail ++ [x], firsth, sig, maxdepth - 1) end))
+
+            [{:not, {:and, operands}} | tail] ->
+              operands = Logic.negate(operands)
+              '''
+              tasks = for op <- operands do
+                do_async(fn -> sat?([op] ++ tail, firsth, maxdepth - 1) end)
+              end
+              Enum.any?(tasks)
+              '''
+              Enum.any?(Enum.map(operands, fn x -> sat?(tail ++ [x], firsth, sig, maxdepth - 1) end))
+
+            # gamma: instantiate existence quantors with new constants
+            [ {:exqu, v, x} | tail ] ->
+              theta = instantiate_variables(v, sig)
+              new_expressions = [Logic.substitute(x, theta)] ++ tail
+              new_sig = Logic.get_Signature(new_expressions)
+              sat?(new_expressions, firsth, new_sig, maxdepth - 1)
+            [ {:not, {:allqu, v, x}} | tail ] -> sat?([{:exqu, v, {:not, x}}] ++ tail , firsth, sig, maxdepth - 1)
+
+            # delta
+            [ {:allqu, v, x} | tail ] ->
+              chosen_var = Enum.random(v)
+              theta = instantiate_variables([chosen_var], sig)
+              if length(v) > 1 do
+                filtered_v = for a when a != chosen_var <- v, do: a
+                new_expressions =  tail ++ [{:allqu, filtered_v, Logic.substitute(x, theta)}] ++ [{:allqu, v, x}]
+                new_sig = Logic.get_Signature(new_expressions)
+                sat?(new_expressions, firsth, new_sig, maxdepth - 1)
+              else
+                new_expressions = tail ++ [Logic.substitute(x, theta)] ++ [{:allqu, v, x}]
+                new_sig = Logic.get_Signature(new_expressions)
+                sat?(new_expressions, firsth, new_sig, maxdepth - 1)
+              end
+            [ {:not, {:exqu, v, x}} | tail ] -> sat?([{:allqu, v, {:not, x}}] ++ tail , firsth, sig, maxdepth - 1)
+
+            # else literal in front => ignore
+            [x | tail] ->
+              if Logic.atomic?(x) do
+                sat?(tail ++ [x], firsth, sig, maxdepth - 1)
+              else :error_missing_case
             end
-            Enum.any?(tasks)
-            '''
-            Enum.any?(Enum.map(operands, fn x -> sat?(tail ++ [x], firsth) end))
-
-          [{:not, {:and, operands}} | tail] ->
-            operands = Logic.negate(operands)
-            '''
-            tasks = for op <- operands do
-              do_async(fn -> sat?([op] ++ tail, firsth) end)
-            end
-            Enum.any?(tasks)
-            '''
-            Enum.any?(Enum.map(operands, fn x -> sat?(tail ++ [x], firsth) end))
-
-
-          # else literal in front => ignore
-          [x | tail] -> if Logic.atomic?(x) do sat?(tail ++ [x], firsth) else :error_missing_case end
+          end
         end
       end
+    end
+  end
+
+  # Creates a substitution map for new constants given a variable list.
+  def instantiate_variables(varlist, sig) do
+    %{Constants: consts} = sig
+    if Enum.random([1, 2]) == 1 and consts != [] do
+      case varlist do
+        [] -> %{}
+        [v | vs] ->
+          const_to_inst = Enum.random(consts)
+          Map.merge(%{v => const_to_inst}, instantiate_variables(vs, sig))
+      end
+
+    else
+      case varlist do
+        [] -> %{}
+        [v | vs] ->
+          new_c = String.to_atom("i_" <> Atom.to_string(v))
+          if new_c in sig[:Constants] do
+            new_c = get_new_constants(sig)
+            new_sig = %{sig | :Constants => (sig[:Constants] ++ [new_c])}
+            Map.merge(%{v => new_c}, instantiate_variables(vs, new_sig))
+          else
+            new_sig = %{sig | :Constants => (sig[:Constants] ++ [new_c])}
+            Map.merge(%{v => new_c}, instantiate_variables(vs, new_sig))
+          end
+      end
+    end
+  end
+
+  # creates a new atom representing a constant given a signature.
+  def get_new_constants(sig) do
+    rand_const = String.to_atom("i_" <> for _ <- 1..5, into: "", do: <<Enum.random(?a..?z)>>)
+    if rand_const in sig[:Constants] do
+      get_new_constants(sig) # retry
+    else
+      rand_const
     end
   end
 
@@ -120,15 +208,31 @@ defmodule Tableaux do
   def contradiction?(expressions) do
     case expressions do
       [] -> :false
-      [{:not, phi} | tail] -> if phi in tail do :true else contradiction?(tail) end
-      [phi | tail] -> if {:not, phi} in tail do :true else contradiction?(tail) end
+      [{:not, phi} | tail] -> if phi in tail do
+        #IO.puts("Contradiction found!")
+        #IO.inspect(phi)
+        #IO.inspect({:not, phi})
+        :true
+      else contradiction?(tail) end
+      [phi | tail] -> if {:not, phi} in tail do
+        #IO.puts("Contradiction found!")
+        #IO.inspect(phi)
+        #IO.inspect({:not, phi})
+        :true
+      else contradiction?(tail) end
     end
   end
 
   # checks if list of expressions only contains atomic expressions
   def done?(expressions) do
+    Logic.atomic?(expressions)
+  end
+
+  #@spec done?(maybe_improper_list) :: boolean
+  def done_old(expressions) do
     case expressions do
-      [] -> :true
+      [] ->
+        :true
       [x | tail] ->
         case Logic.atomic?(x) do
           :true -> done?(tail)

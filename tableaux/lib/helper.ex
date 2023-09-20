@@ -4,11 +4,12 @@ defmodule Helper do
     dir = "../data/tptp/" <> type <> "/"
     {:ok, dir_contents} = File.ls(dir)
     files = Enum.map(dir_contents, fn x -> File.read(dir <> x)end)
-    #IO.puts("Read files..")
+    IO.puts("Read files..")
     expressions = Enum.map(files, fn {:ok, x} ->Parser.parse(x)end)
-    #IO.puts("Parsed files..")
-    results = Enum.map(expressions, fn x -> Tableaux.proof(x) end)
-    Enum.zip(dir_contents, results)
+    IO.puts("Parsed files..")
+    results = Enum.map(expressions, fn x -> Tableaux.proof(x, false) end)
+    IO.inspect(Enum.zip(dir_contents, results))
+    results
   end
 
   def proof(file) do
@@ -18,6 +19,11 @@ defmodule Helper do
   def proof_KR() do
     proof("../data/tptp/cnf_sat/KRS005-1.p")
   end
+
+  def proof_LCL() do
+    proof("../data/tptp/cnf_unsat/LCL117-1.p")
+  end
+
 
   def timed_proof(expr) do
     IO.puts("Result: ")

@@ -18,6 +18,7 @@ defmodule Parser do
     {errorcode_lex, tokens, _} = :TPTP_lexer.string(to_charlist(str))
     case errorcode_lex do
       :ok ->
+        #IO.inspect(tokens)
         {errorcode_parse, expression} = :TPTP_parser.parse(tokens)
         case errorcode_parse do
           :ok ->
